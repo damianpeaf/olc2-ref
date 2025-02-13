@@ -44,7 +44,12 @@ alias antlr4='java -jar /Users/damianpeaf/antlr/antlr4.jar'
 
 ```bash
 java -jar antlr-4.13.2-complete.jar -Dlanguage=CSharp -o analyzer -package analyzer -visitor -no-listener grammars/*.g4
+
+
 antlr4 -Dlanguage=CSharp -o analyzer -package analyzer -visitor -no-listener ./grammars/*.g4
+
+antlr4 -Dlanguage=CSharp -o analyzer -package analyzer -visitor *.g4
+
 ```
 
 6. Instalar paquetes
