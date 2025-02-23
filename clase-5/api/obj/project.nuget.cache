@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "cmkGEoFpk30=",
+  "success": true,
+  "projectFilePath": "/Users/damianpeaf/clase/clase-5/api/api.csproj",
+  "expectedPackageFiles": [
+    "/Users/damianpeaf/.nuget/packages/antlr4.runtime.standard/4.13.1/antlr4.runtime.standard.4.13.1.nupkg.sha512",
+    "/Users/damianpeaf/.nuget/packages/microsoft.aspnetcore.openapi/9.0.1/microsoft.aspnetcore.openapi.9.0.1.nupkg.sha512",
+    "/Users/damianpeaf/.nuget/packages/microsoft.openapi/1.6.17/microsoft.openapi.1.6.17.nupkg.sha512"
+  ],
+  "logs": []
+}
