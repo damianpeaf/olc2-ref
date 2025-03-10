@@ -1,8 +1,3 @@
-package main
-
-import (
-	"fmt"
-)
 
 // Declaración de struct simple
 type Persona struct {
