@@ -53,3 +53,5 @@ El número de errores en cada archivos es indicado por el archivo de entrada:
 	fmt.Println("| TOTAL                    | ", puntos, "   | 16    |")
 	fmt.Println("+--------------------------+--------+-------+")
 ```
+
+- Cada archivo tiene su equivalente en GoLang (Go orginal), se puede visualizar en la carpeta de [referencia](./ref/).
