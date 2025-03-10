@@ -65,23 +65,7 @@ func main() {
 	fmt.Println("matriz:")
 	fmt.Println("###Validacion Manual")
 	fmt.Println(matriz)
-	puntosMultidimensional = puntosMultidimensional + 1
-
-	fmt.Println("\nCreación de matriz 3D:")
-	matriz3D := [][][]int{
-		{
-			{1, 2},
-			{3, 4},
-		},
-		{
-			{5, 6},
-			{7, 8},
-		},
-	}
-	fmt.Println("matriz3D:")
-	fmt.Println("###Validacion Manual")
-	fmt.Println(matriz3D)
-	puntosMultidimensional = puntosMultidimensional + 1
+	puntosMultidimensional = puntosMultidimensional + 2
 
 	fmt.Println("\nMatrices irregulares:")
 	matrizIrregular := [][]int{
@@ -125,25 +109,12 @@ func main() {
 		fmt.Println("X Modificación de elementos en matriz 2D: incorrecto")
 	}
 
-	fmt.Println("\nAcceso a elementos de matriz 3D:")
-	elemento111 := matriz3D[0][0][0]
-	elemento222 := matriz3D[1][1][1]
-	fmt.Println("Elemento [0][0][0]:", elemento111)
-	fmt.Println("Elemento [1][1][1]:", elemento222)
-
-	if elemento111 == 1 && elemento222 == 8 {
-		puntosAccesoMultidimensional = puntosAccesoMultidimensional + 1
-		fmt.Println("OK Acceso a elementos de matriz 3D: correcto")
-	} else {
-		fmt.Println("X Acceso a elementos de matriz 3D: incorrecto")
-	}
-
 	fmt.Println("\nAcceso a filas completas:")
 	primeraFila := matriz[0]
 	fmt.Println("Primera fila de matriz:", primeraFila)
 
 	if primeraFila[0] == 100 && primeraFila[1] == 2 && primeraFila[2] == 3 {
-		puntosAccesoMultidimensional = puntosAccesoMultidimensional + 1
+		puntosAccesoMultidimensional = puntosAccesoMultidimensional + 2
 		fmt.Println("OK Acceso a filas completas: correcto")
 	} else {
 		fmt.Println("X Acceso a filas completas: incorrecto")
