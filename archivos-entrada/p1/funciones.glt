@@ -15,7 +15,7 @@ func saludarPersona(nombre string) {
 }
 
 // Función con parámetros que retorna un valor
-func sumar(a, b int) int {
+func sumar(a int, b int) int {
 	return a + b
 }
 
