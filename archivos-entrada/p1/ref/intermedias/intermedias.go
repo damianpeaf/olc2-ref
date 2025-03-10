@@ -277,7 +277,7 @@ func main() {
 	contador := 0
 	suma = 0
 
-	for {
+	for true {
 		fmt.Println("contador =", contador)
 		suma = suma + contador
 		contador = contador + 1
