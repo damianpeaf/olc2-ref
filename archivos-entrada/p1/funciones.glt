@@ -36,7 +36,7 @@ func fibonacci(n int) int {
 }
 
 // Función recursiva: torres de Hanoi
-func hanoi(n int, origen, auxiliar, destino string) {
+func hanoi(n int, origen string, auxiliar string, destino string) {
 	if n == 1 {
 		fmt.Println("Mover disco 1 de", origen, "a", destino)
 		return
