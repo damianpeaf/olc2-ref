@@ -1,0 +1,268 @@
+package main
+
+import (
+	"fmt"
+)
+
+// Declaración de struct simple
+type Persona struct {
+	Nombre   string
+	Edad     int
+	Estatura float64
+	Activo   bool
+}
+
+// Declaración de struct con campos anidados
+type Empleado struct {
+	DatosPersonales Persona
+	ID              string
+	Departamento    string
+	Salario         float64
+}
+
+// Declaración de struct para nodo de lista enlazada
+type Nodo struct {
+	Nombre    string
+	Valor     int
+	Siguiente *Nodo
+}
+
+// Método para Persona: Saludar
+func (p Persona) Saludar() string {
+	return "Hola, mi nombre es " + p.Nombre
+}
+
+// Método para Nodo: ObtenerNombre
+func (n Nodo) ObtenerNombre() string {
+	return n.Nombre
+}
+
+// Método para Nodo: CambiarValor
+func (n *Nodo) CambiarValor(nuevoValor int) {
+	n.Valor = nuevoValor
+}
+
+// Método para Nodo: ImprimirNombre
+func (n Nodo) ImprimirNombre() {
+	fmt.Println("Nombre del nodo:", n.Nombre)
+}
+
+// Método para Nodo: ObtenerSiguienteNombre
+func (n Nodo) ObtenerSiguienteNombre() string {
+	if n.Siguiente == nil {
+		return "No hay siguiente nodo"
+	}
+	return n.Siguiente.Nombre
+}
+
+func main() {
+	puntos := 0
+
+	fmt.Println("=== Archivo de prueba de structs ===")
+
+	// 1. Declaración (1 punto)
+	fmt.Println("==== Declaración ====")
+	puntosDeclaracion := 0
+
+	fmt.Println("Declaración de structs:")
+	fmt.Println("type Persona struct {")
+	fmt.Println("    Nombre   string")
+	fmt.Println("    Edad     int")
+	fmt.Println("    Estatura float64")
+	fmt.Println("    Activo   bool")
+	fmt.Println("}")
+
+	fmt.Println("\ntype Nodo struct {")
+	fmt.Println("    Nombre    string")
+	fmt.Println("    Valor     int")
+	fmt.Println("    Siguiente *Nodo")
+	fmt.Println("}")
+
+	// Verificación manual
+	puntosDeclaracion = puntosDeclaracion + 1
+
+	// 2. Instanciación (2 puntos)
+	fmt.Println("\n==== Instanciación ====")
+	puntosInstanciacion := 0
+
+	fmt.Println("Instanciación con valores iniciales:")
+	persona1 := Persona{
+		Nombre:   "Juan",
+		Edad:     30,
+		Estatura: 1.75,
+		Activo:   true,
+	}
+	fmt.Println("###Validacion Manual")
+	fmt.Println("persona1:", persona1)
+	puntosInstanciacion = puntosInstanciacion + 2
+
+	// 3. Asignación a propiedades de tipos primitivos (2 puntos)
+	fmt.Println("\n==== Asignación a propiedades de tipos primitivos ====")
+	puntosAsignacionPrimitivos := 0
+
+	fmt.Println("Asignación directa:")
+	persona1.Nombre = "María"
+	persona1.Edad = 25
+	persona1.Estatura = 1.65
+	persona1.Activo = true
+
+	if persona1.Nombre == "María" && persona1.Edad == 25 {
+		puntosAsignacionPrimitivos = puntosAsignacionPrimitivos + 2
+		fmt.Println("OK Asignación directa: correcto")
+	} else {
+		fmt.Println("X Asignación directa: incorrecto")
+	}
+
+	// 4. Acceso a propiedades de tipos primitivos (2 puntos)
+	fmt.Println("\n==== Acceso a propiedades de tipos primitivos ====")
+	puntosAccesoPrimitivos := 0
+
+	fmt.Println("Acceso directo:")
+	nombrePersona1 := persona1.Nombre
+	edadPersona1 := persona1.Edad
+	fmt.Println("Nombre de persona1:", nombrePersona1)
+	fmt.Println("Edad de persona1:", edadPersona1)
+
+	if nombrePersona1 == "María" && edadPersona1 == 25 {
+		puntosAccesoPrimitivos = puntosAccesoPrimitivos + 2
+		fmt.Println("OK Acceso directo: correcto")
+	} else {
+		fmt.Println("X Acceso directo: incorrecto")
+	}
+
+	// 5. Asignación a propiedades dentro de structs anidados (3 puntos)
+	fmt.Println("\n==== Asignación a propiedades dentro de structs anidados ====")
+	puntosAsignacionAnidados := 0
+
+	fmt.Println("Creación de nodos enlazados:")
+	nodo1 := &Nodo{
+		Nombre:    "Primero",
+		Valor:     10,
+		Siguiente: nil,
+	}
+
+	nodo2 := &Nodo{
+		Nombre:    "Segundo",
+		Valor:     20,
+		Siguiente: nil,
+	}
+
+	// Enlazar nodo1 con nodo2
+	nodo1.Siguiente = nodo2
+
+	// Crear nodo3 y enlazarlo con nodo2
+	nodo3 := &Nodo{
+		Nombre:    "Tercero",
+		Valor:     30,
+		Siguiente: nil,
+	}
+
+	nodo2.Siguiente = nodo3
+
+	// Modificar el valor del nodo2 a través de nodo1
+	nodo1.Siguiente.Valor = 25
+
+	// Modificar el nombre del nodo3 a través de nodo1
+	nodo1.Siguiente.Siguiente.Nombre = "Tercero Modificado"
+
+	// Aqui se asume que toda la asignacion fue correcta
+	puntosAsignacionAnidados = puntosAsignacionAnidados + 3
+
+	// 6. Acceso a propiedades dentro de structs anidados (3 puntos)
+	fmt.Println("\n==== Acceso a propiedades dentro de structs anidados ====")
+	puntosAccesoAnidados := 0
+
+	fmt.Println("Acceso a propiedades de nodos enlazados:")
+	nombreNodo1 := nodo1.Nombre
+	valorNodo2 := nodo1.Siguiente.Valor
+	nombreNodo3 := nodo1.Siguiente.Siguiente.Nombre
+
+	fmt.Println("Nombre del nodo1:", nombreNodo1)
+	fmt.Println("Valor del nodo2:", valorNodo2)
+	fmt.Println("Nombre del nodo3:", nombreNodo3)
+
+	// Verificar si hay un nodo después del nodo3
+	if nodo1.Siguiente.Siguiente.Siguiente == nil {
+		fmt.Println("No hay nodo después del nodo3")
+	} else {
+		fmt.Println("Hay un nodo después del nodo3")
+	}
+
+	if nombreNodo1 == "Primero" && valorNodo2 == 25 && nombreNodo3 == "Tercero Modificado" {
+		puntosAccesoAnidados = puntosAccesoAnidados + 3
+		fmt.Println("OK Acceso a propiedades anidadas: correcto")
+	} else {
+		fmt.Println("X Acceso a propiedades anidadas: incorrecto")
+	}
+
+	// 7. Funciones asociadas a structs (6 puntos)
+	fmt.Println("\n==== Funciones asociadas a structs ====")
+	puntosFuncionesStruct := 0
+
+	fmt.Println("Método para obtener nombre del nodo:")
+	nombreObtenido := nodo1.ObtenerNombre()
+	fmt.Println("Nombre obtenido:", nombreObtenido)
+
+	if nombreObtenido == "Primero" {
+		puntosFuncionesStruct = puntosFuncionesStruct + 1
+		fmt.Println("OK Método para obtener nombre: correcto")
+	} else {
+		fmt.Println("X Método para obtener nombre: incorrecto")
+	}
+
+	fmt.Println("\nMétodo para cambiar valor del nodo:")
+	nodo1.CambiarValor(15)
+
+	if nodo1.Valor == 15 {
+		puntosFuncionesStruct = puntosFuncionesStruct + 2
+		fmt.Println("OK Método para cambiar valor: correcto")
+	} else {
+		fmt.Println("X Método para cambiar valor: incorrecto")
+	}
+
+	fmt.Println("\nMétodo para imprimir nombre del nodo:")
+	fmt.Println("###Validacion Manual")
+	nodo1.ImprimirNombre()
+	puntosFuncionesStruct = puntosFuncionesStruct + 1
+
+	fmt.Println("\nMétodo para obtener nombre del siguiente nodo:")
+	nombreSiguiente := nodo1.ObtenerSiguienteNombre()
+	fmt.Println("Nombre del siguiente nodo:", nombreSiguiente)
+
+	nombreSiguienteDeNodo3 := nodo3.ObtenerSiguienteNombre()
+	fmt.Println("Nombre del siguiente nodo de nodo3:", nombreSiguienteDeNodo3)
+
+	if nombreSiguiente == "Segundo" {
+		puntosFuncionesStruct = puntosFuncionesStruct + 1
+		fmt.Println("OK Método para obtener nombre del siguiente: correcto")
+	} else {
+		fmt.Println("X Método para obtener nombre del siguiente: incorrecto")
+	}
+
+	if nombreSiguienteDeNodo3 == "No hay siguiente nodo" {
+		puntosFuncionesStruct = puntosFuncionesStruct + 1
+		fmt.Println("OK Método para obtener nombre del siguiente de nodo3: correcto")
+	} else {
+		fmt.Println("X Método para obtener nombre del siguiente de nodo3: incorrecto")
+	}
+
+	// Resumen de puntos
+	puntos = puntosDeclaracion + puntosInstanciacion + puntosAsignacionPrimitivos +
+		puntosAccesoPrimitivos + puntosAsignacionAnidados + puntosAccesoAnidados +
+		puntosFuncionesStruct
+
+	fmt.Println("\n=== Tabla de Resultados ===")
+	fmt.Println("+------------------------------------------+--------+-------+")
+	fmt.Println("| Característica                           | Puntos | Total |")
+	fmt.Println("+------------------------------------------+--------+-------+")
+	fmt.Println("| Declaración                              | ", puntosDeclaracion, "    | 1     |")
+	fmt.Println("| Instanciación                            | ", puntosInstanciacion, "    | 2     |")
+	fmt.Println("| Asignación a propiedades primitivas      | ", puntosAsignacionPrimitivos, "    | 2     |")
+	fmt.Println("| Acceso a propiedades primitivas          | ", puntosAccesoPrimitivos, "    | 2     |")
+	fmt.Println("| Asignación a propiedades anidadas        | ", puntosAsignacionAnidados, "    | 3     |")
+	fmt.Println("| Acceso a propiedades anidadas            | ", puntosAccesoAnidados, "    | 3     |")
+	fmt.Println("| Funciones asociadas a structs            | ", puntosFuncionesStruct, "    | 6     |")
+	fmt.Println("+------------------------------------------+--------+-------+")
+	fmt.Println("| TOTAL                                    | ", puntos, "   | 19    |")
+	fmt.Println("+------------------------------------------+--------+-------+")
+}
