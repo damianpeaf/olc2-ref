@@ -5,7 +5,7 @@ using System.Text;
 
 public class StackObject
 {
-    public enum StackObjectType { Int, Float, String }
+    public enum StackObjectType { Int, Float, String, Bool }
     public StackObjectType Type { get; set; }
     public int Length { get; set; }
     public int Depth { get; set; }
@@ -22,12 +22,25 @@ public class ArmGenerator
 
     private int depth = 0;
 
+    private int labelCounter = 0;
+
 
     /* --- STACK OPERATIONS --- */
 
     public void PushObject(StackObject obj)
     {
         stack.Add(obj);
+    }
+
+    public void commentStack()
+    {
+        string stackString = "Stack: ";
+        foreach (var obj in stack)
+        {
+            stackString += $"[{obj.Type}, {obj.Depth}, {obj.Id}] ";
+        }
+
+        Comment(stackString);
     }
 
     public void PushConstant(StackObject obj, object value)
@@ -74,7 +87,10 @@ public class ArmGenerator
                     Mov(Register.X0, 1);
                     Add(Register.HP, Register.HP, Register.X0);
                 }
-
+                break;
+            case StackObject.StackObjectType.Bool:
+                Mov(Register.X0, (bool)value ? 1 : 0);
+                Push(Register.X0);
                 break;
         }
 
@@ -124,6 +140,17 @@ public class ArmGenerator
         return new StackObject
         {
             Type = StackObject.StackObjectType.String,
+            Length = 8,
+            Depth = depth,
+            Id = null
+        };
+    }
+
+    public StackObject BoolObject()
+    {
+        return new StackObject
+        {
+            Type = StackObject.StackObjectType.Bool,
             Length = 8,
             Depth = depth,
             Id = null
@@ -188,6 +215,7 @@ public class ArmGenerator
             byteOffset += stack[i].Length;
         }
 
+        Console.WriteLine(this.ToString());
         throw new Exception($"Object {id} not found in stack");
     }
 
@@ -288,6 +316,86 @@ public class ArmGenerator
     public void Fdiv(string rd, string rs1, string rs2)
     {
         instructions.Add($"FDIV {rd}, {rs1}, {rs2}");
+    }
+
+    // Branch operations
+
+    public void B(string label)
+    {
+        instructions.Add($"B {label}");
+    }
+
+    public void Bl(string label)
+    {
+        instructions.Add($"BL {label}");
+    }
+
+    public void Cbz(string rs, string label)
+    {
+        instructions.Add($"CBZ {rs}, {label}");
+    }
+
+    public void Cbnz(string rs, string label)
+    {
+        instructions.Add($"CBNZ {rs}, {label}");
+    }
+
+    public void Cmp(string rs1, string rs2)
+    {
+        instructions.Add($"CMP {rs1}, {rs2}");
+    }
+
+
+
+    public void Beq(string label)
+    {
+        instructions.Add($"BEQ {label}");
+    }
+
+    public void Bne(string label)
+    {
+        instructions.Add($"BNE {label}");
+    }
+
+    public void Bgt(string label)
+    {
+        instructions.Add($"BGT {label}");
+    }
+
+    public void Blt(string label)
+    {
+        instructions.Add($"BLT {label}");
+    }
+
+    public void Bge(string label)
+    {
+        instructions.Add($"BGE {label}");
+    }
+
+    public void Ble(string label)
+    {
+        instructions.Add($"BLE {label}");
+    }
+
+    public void Ret()
+    {
+        instructions.Add($"RET");
+    }
+
+    public String GetLabel()
+    {
+        return $"L{labelCounter++}";
+    }
+
+    public void SetLabel(string label)
+    {
+        instructions.Add($"{label}:");
+    }
+
+
+    public void Ret(string rs)
+    {
+        instructions.Add($"RET {rs}");
     }
 
 

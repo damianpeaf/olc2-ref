@@ -1,4 +1,4 @@
-// Generated from /Users/damianpeaf/aux/clase-8/api/Language.g4 by ANTLR 4.13.1
+// Generated from /home/damianpeaf/aux/olc2-holy/clase-13/api/Language.g4 by ANTLR 4.13.1
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
 /**
@@ -279,6 +279,18 @@ public interface LanguageListener extends ParseTreeListener {
 	 */
 	void exitInt(LanguageParser.IntContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code Array}
+	 * labeled alternative in {@link LanguageParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterArray(LanguageParser.ArrayContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code Array}
+	 * labeled alternative in {@link LanguageParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitArray(LanguageParser.ArrayContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code Float}
 	 * labeled alternative in {@link LanguageParser#expr}.
 	 * @param ctx the parse tree
@@ -386,6 +398,18 @@ public interface LanguageListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitGet(LanguageParser.GetContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code ArrayAccess}
+	 * labeled alternative in {@link LanguageParser#call}.
+	 * @param ctx the parse tree
+	 */
+	void enterArrayAccess(LanguageParser.ArrayAccessContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code ArrayAccess}
+	 * labeled alternative in {@link LanguageParser#call}.
+	 * @param ctx the parse tree
+	 */
+	void exitArrayAccess(LanguageParser.ArrayAccessContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link LanguageParser#args}.
 	 * @param ctx the parse tree

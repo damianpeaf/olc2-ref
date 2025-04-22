@@ -4,28 +4,50 @@ heap: .space 4096
 .global _start
 _start:
     adr x10, heap
-// Variable declaration: a
-// Add/Subtract operation
+// Variable declaration: i
+// Constant: 0
+MOV x0, #0
+STR x0, [SP, #-8]!
+L0:
+// Visiting while condition
+// Constant: True
+MOV x0, #1
+STR x0, [SP, #-8]!
+LDR x0, [SP], #8
+CBZ x0, L1
+// Visiting while block
+// Block statement
+// If statement
+// Relational operation
 // Visiting left operand
-// Constant: 1.5
-MOVZ X0, #0, LSL #0
-MOVK X0, #0, LSL #16
-MOVK X0, #0, LSL #32
-MOVK X0, #16376, LSL #48
+MOV x0, #0
+ADD x0, sp, x0
+LDR x0, [x0, #0]
 STR x0, [SP, #-8]!
 // Visiting right operand
-// Constant: 2.5
-MOVZ X0, #0, LSL #0
-MOVK X0, #0, LSL #16
-MOVK X0, #0, LSL #32
-MOVK X0, #16388, LSL #48
+// Constant: 10
+MOV x0, #10
 STR x0, [SP, #-8]!
 // Popping operands
-LDR d0, [SP], #8
-LDR d1, [SP], #8
-// Converting to double
-FADD d0, d0, d1
-STR d0, [SP, #-8]!
+LDR x0, [SP], #8
+LDR x1, [SP], #8
+CMP x1, x0
+// Setting condition flags
+BGT L2
+MOV x0, #0
+STR x0, [SP, #-8]!
+B L3
+L2:
+MOV x0, #1
+STR x0, [SP, #-8]!
+L3:
+LDR x0, [SP], #8
+CBZ x0, L4
+// Visiting if block
+// Block statement
+// Break statement
+B L1
+L4:
 // Print statement
 // Visiting expression
 MOV x0, #0
@@ -33,8 +55,36 @@ ADD x0, sp, x0
 LDR x0, [x0, #0]
 STR x0, [SP, #-8]!
 // Popping value to print
-LDR d0, [SP], #8
-BL print_double
+LDR x0, [SP], #8
+MOV X0, x0
+BL print_integer
+// Expression statement
+// Assignment to variable: i
+// Add/Subtract operation
+// Visiting left operand
+MOV x0, #0
+ADD x0, sp, x0
+LDR x0, [x0, #0]
+STR x0, [SP, #-8]!
+// Visiting right operand
+// Constant: 1
+MOV x0, #1
+STR x0, [SP, #-8]!
+// Popping operands
+LDR x0, [SP], #8
+LDR x1, [SP], #8
+ADD x0, x0, x1
+// Pushing result
+STR x0, [SP, #-8]!
+LDR x0, [SP], #8
+MOV x1, #0
+ADD x1, sp, x1
+STR x0, [x1, #0]
+STR x0, [SP, #-8]!
+// Popping value to discard
+LDR x0, [SP], #8
+B L0
+L1:
 MOV x0, #0
 MOV x8, #93
 SVC #0
@@ -141,109 +191,4 @@ print_result:
     ldp x29, x30, [sp], #16    // Restore frame pointer and link register
     ret                        // Return to caller
     
-
-//--------------------------------------------------------------
-// print_double - Prints a double precision float to stdout
-//
-// Input:
-//   d0 - The double value to print
-//--------------------------------------------------------------
-print_double:
-    // Save context
-    stp x29, x30, [sp, #-16]!    
-    stp x19, x20, [sp, #-16]!
-    stp x21, x22, [sp, #-16]!
-    stp x23, x24, [sp, #-16]!
-    
-    // Check if number is negative
-    fmov x19, d0
-    tst x19, #(1 << 63)       // Comprueba el bit de signo
-    beq skip_minus
-
-    // Print minus sign
-    mov x0, #1
-    adr x1, minus_sign
-    mov x2, #1
-    mov x8, #64
-    svc #0
-
-    // Make value positive
-    fneg d0, d0
-
-skip_minus:
-    // Convert integer part
-    fcvtzs x0, d0             // x0 = int(d0)
-    bl print_integer
-
-    // Print dot '.'
-    mov x0, #1
-    adr x1, dot_char
-    mov x2, #1
-    mov x8, #64
-    svc #0
-
-    // Get fractional part: frac = d0 - float(int(d0))
-    frintm d4, d0             // d4 = floor(d0)
-    fsub d2, d0, d4           // d2 = d0 - floor(d0) (exact fraction)
-
-    // Para 2.5, d2 debe ser exactamente 0.5
-
-    // Multiplicar por 1_000_000 (6 decimales)
-    movz x1, #0x000F, lsl #16
-    movk x1, #0x4240, lsl #0   // x1 = 1000000
-    scvtf d3, x1              // d3 = 1000000.0
-    fmul d2, d2, d3           // d2 = frac * 1_000_000
-    
-    // Redondear al entero más cercano para evitar errores de precisión
-    frintn d2, d2             // d2 = round(d2)
-    fcvtzs x0, d2             // x0 = int(d2)
-
-    // Imprimir ceros a la izquierda si es necesario
-    mov x20, x0               // x20 = fracción entera
-    movz x21, #0x0001, lsl #16
-    movk x21, #0x86A0, lsl #0  // x21 = 100000
-    mov x22, #0               // inicializar contador de ceros
-    mov x23, #10              // constante para división
-
-leading_zero_loop:
-    udiv x24, x20, x21        // x24 = x20 / x21
-    cbnz x24, done_leading_zeros  // Si hay un dígito no cero, salir del bucle
-
-    // Imprimir '0'
-    mov x0, #1
-    adr x1, zero_char
-    mov x2, #1
-    mov x8, #64
-    svc #0
-
-    udiv x21, x21, x23        // x21 /= 10
-    add x22, x22, #1          // incrementar contador de ceros
-    cmp x21, #0               // verificar si llegamos al final
-    beq print_remaining       // si divisor es 0, saltar a imprimir el resto
-    b leading_zero_loop
-
-done_leading_zeros:
-    // Print the remaining fractional part
-    mov x0, x20
-    bl print_integer
-    b exit_function
-
-print_remaining:
-    // Caso especial cuando la parte fraccionaria es 0 después de imprimir ceros
-    cmp x20, #0
-    bne exit_function
-    
-    // Ya imprimimos todos los ceros necesarios
-    // No hace falta imprimir nada más
-
-exit_function:
-    // Restore context
-    ldp x23, x24, [sp], #16
-    ldp x21, x22, [sp], #16
-    ldp x19, x20, [sp], #16
-    ldp x29, x30, [sp], #16
-    ret
-    
 minus_sign: .ascii "-"
-dot_char: .ascii "."
-zero_char: .ascii "0"

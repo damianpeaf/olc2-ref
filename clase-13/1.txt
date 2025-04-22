@@ -1,0 +1,14 @@
+
+
+for (var i = 0; i <= 10; i = i +1){
+    print(i);
+}
+
+var i = 0;
+while (true) {
+    if (i > 10) {
+        break;
+    }
+    print(i);
+    i = i + 1;
+}

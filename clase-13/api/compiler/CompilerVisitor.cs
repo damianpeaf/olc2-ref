@@ -1,10 +1,13 @@
 
 using analyzer;
+using Antlr4.Runtime.Misc;
 
 public class CompilerVisitor : LanguageBaseVisitor<Object?>
 {
 
     public ArmGenerator c = new ArmGenerator();
+    private string continueLabel = "";
+    private string breakLabel = "";
 
     public CompilerVisitor()
     {
@@ -184,6 +187,73 @@ public class CompilerVisitor : LanguageBaseVisitor<Object?>
 
         return null;
     }
+
+    public override Object? VisitRelational(LanguageParser.RelationalContext context)
+    {
+        c.Comment("Relational operation");
+        var operation = context.op.Text;
+        c.Comment("Visiting left operand");
+        Visit(context.expr(0));  // Visit left operand; TOP -> [left]
+        c.Comment("Visiting right operand");
+        Visit(context.expr(1));  // Visit right operand; TOP -> [right, left]
+        c.Comment("Popping operands");
+
+        var isRightDouble = c.TopObject().Type == StackObject.StackObjectType.Float;
+        var right = c.PopObject(isRightDouble ? Register.D0 : Register.X0); // Pop right operand; TOP -> [left]
+        var isLeftDouble = c.TopObject().Type == StackObject.StackObjectType.Float;
+        var left = c.PopObject(isLeftDouble ? Register.D1 : Register.X1); // Pop left operand; TOP -> []
+
+        if (isLeftDouble || isRightDouble)
+        {
+            // TODO
+            return null;
+        }
+
+        // Handle integer comparison
+
+        c.Cmp(Register.X1, Register.X0); // Compare left and right operands
+        c.Comment("Setting condition flags");
+
+        var trueLabel = c.GetLabel();
+        var endLabel = c.GetLabel();
+
+        /*
+            push 0
+            b end
+            trueLabel:
+                push 1
+            end:
+        */
+
+        switch (operation)
+        {
+            case "<":
+                c.Blt(trueLabel); // If left < right, branch to trueLabel
+                break;
+            case "<=":
+                c.Ble(trueLabel); // If left <= right, branch to trueLabel
+                break;
+            case ">":
+                c.Bgt(trueLabel); // If left > right, branch to trueLabel
+                break;
+            case ">=":
+                c.Bge(trueLabel); // If left >= right, branch to trueLabel
+                break;
+        }
+
+        c.Mov(Register.X0, 0); // Set result to false (0)
+        c.Push(Register.X0); // Push result to stack
+        c.B(endLabel); // Branch to endLabel
+        c.SetLabel(trueLabel); // Set trueLabel
+        c.Mov(Register.X0, 1); // Set result to true (1)
+        c.Push(Register.X0); // Push result to stack
+        c.SetLabel(endLabel); // Set endLabel
+
+        c.PushObject(c.BoolObject()); // Push boolean object to stack
+
+        return null;
+    }
+
     public override Object? VisitString(LanguageParser.StringContext context)
     {
         var value = context.STRING().GetText().Trim('"');
@@ -229,4 +299,186 @@ public class CompilerVisitor : LanguageBaseVisitor<Object?>
 
         return null;
     }
+
+    // VisitBoolean
+    public override Object? VisitBoolean(LanguageParser.BooleanContext context)
+    {
+        var value = bool.Parse(context.BOOL().GetText());
+
+        c.Comment("Constant: " + value);
+        var boolObject = c.BoolObject();
+        c.PushConstant(boolObject, value);
+
+        return null;
+    }
+
+    public override Object? VisitIfStmt(LanguageParser.IfStmtContext context)
+    {
+        c.Comment("If statement");
+        Visit(context.expr());
+        c.PopObject(Register.X0); // Pop the condition value
+
+        /*
+        
+        HAY 2 casos
+
+        SOLO UN IF
+
+        if (!cond) goto end
+            ...
+        end:
+            ...
+
+        IF + ELSE
+        if (!cond) goto else
+            ...
+        goto end
+        else:
+            ...
+        end:
+
+        */
+
+        var hasElse = context.stmt(1);
+
+        if (hasElse != null)
+        {
+            var elseLabel = c.GetLabel();
+            var endLabel = c.GetLabel();
+
+            c.Cbz(Register.X0, elseLabel); // If condition is false, jump to else
+            c.Comment("Visiting if block");
+            Visit(context.stmt(0)); // Visit the if block
+            c.B(endLabel); // Jump to end
+            c.SetLabel(elseLabel); // Set the else label
+            c.Comment("Visiting else block");
+            Visit(hasElse); // Visit the else block
+            c.SetLabel(endLabel); // Set the end label
+        }
+        else
+        {
+            var endLabel = c.GetLabel();
+            c.Cbz(Register.X0, endLabel); // If condition is false, jump to end
+            c.Comment("Visiting if block");
+            Visit(context.stmt(0)); // Visit the if block
+            c.SetLabel(endLabel); // Set the end label
+        }
+
+
+        return null;
+    }
+
+    public override Object? VisitWhileStmt(LanguageParser.WhileStmtContext context)
+    {
+
+        /*
+            start:
+                condition
+                if (!cond) goto end
+                ...
+                goto start
+            end:
+        */
+
+        var previousContinueLabel = continueLabel;
+        var previousBreakLabel = breakLabel;
+
+        var startLabel = c.GetLabel();
+        var endLabel = c.GetLabel();
+
+        continueLabel = startLabel;
+        breakLabel = endLabel;
+
+        c.SetLabel(startLabel); // Set the start label
+        c.Comment("Visiting while condition");
+        Visit(context.expr()); // Visit the condition
+        c.PopObject(Register.X0); // Pop the condition value
+        c.Cbz(Register.X0, endLabel); // If condition is false, jump to end
+        c.Comment("Visiting while block");
+        Visit(context.stmt()); // Visit the while block
+        c.B(startLabel); // Jump to start
+        c.SetLabel(endLabel); // Set the end label
+
+        continueLabel = previousContinueLabel;
+        breakLabel = previousBreakLabel;
+
+        return null;
+    }
+
+    public override Object? VisitForStmt(LanguageParser.ForStmtContext context)
+    {
+        /*
+            {
+                ...init
+                start:
+                    condition
+                    if (!cond) goto end
+                    ...
+                    increment:
+                        ...increment
+                    goto start
+                end:
+            }
+        */
+
+        var previousContinueLabel = continueLabel;
+        var previousBreakLabel = breakLabel;
+
+        var startLabel = c.GetLabel();
+        var endLabel = c.GetLabel();
+        var incrementLabel = c.GetLabel();
+
+        continueLabel = incrementLabel;
+        breakLabel = endLabel;
+
+        c.NewScope();
+
+        c.Comment("Visiting for initialization");
+        Visit(context.forInit()); // Visit the initialization expression
+        c.Comment("Visiting for condition");
+        c.SetLabel(startLabel); // Set the start label
+        Visit(context.expr(0)); // Visit the condition expression
+        c.commentStack(); // Print the stack for debugging
+        c.PopObject(Register.X0); // Pop the condition value
+        c.Cbz(Register.X0, endLabel); // If condition is false, jump to end
+        c.Comment("Visiting for block");
+        Visit(context.stmt()); // Visit the for block
+        c.SetLabel(incrementLabel); // Set the increment label
+        c.Comment("Visiting for increment");
+        Visit(context.expr(1)); // Visit the increment expression
+        c.B(startLabel); // Jump to start
+        c.SetLabel(endLabel); // Set the end label
+
+        var bytesToRemove = c.endScope();
+        if (bytesToRemove > 0)
+        {
+            c.Comment("Removing " + bytesToRemove + " bytes from stack");
+            c.Mov(Register.X0, bytesToRemove);
+            c.Add(Register.SP, Register.SP, Register.X0); // Adjust stack pointer
+            c.Comment("Stack pointer adjusted");
+        }
+
+        c.Comment("End of for statement");
+
+        continueLabel = previousContinueLabel;
+        breakLabel = previousBreakLabel;
+
+        return null;
+    }
+
+
+    public override Object? VisitBreakStmt(LanguageParser.BreakStmtContext context)
+    {
+        c.Comment("Break statement");
+        c.B(breakLabel); // Jump to break label
+        return null;
+    }
+
+    public override Object? VisitContinueStmt(LanguageParser.ContinueStmtContext context)
+    {
+        c.Comment("Continue statement");
+        c.B(continueLabel); // Jump to continue label
+        return null;
+    }
+
 }
